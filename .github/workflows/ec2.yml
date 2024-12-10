@@ -23,11 +23,12 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh ec2-user@${{ secrets.EC2_IP }} << 'EOF'
+          ssh ubuntu@${{ secrets.EC2_IP }} << 'EOF'
             # Actualizar sistema e instalar Docker
-            sudo yum update -y
-            sudo amazon-linux-extras enable docker
-            sudo yum install -y git docker
+            sudo apt update && sudo apt upgrade -y
+            sudo apt install -y docker.io git
+
+            # Configurar Docker para que inicie automáticamente
             sudo systemctl start docker
             sudo systemctl enable docker
 
@@ -44,7 +45,7 @@ jobs:
             echo "${{ secrets.BACKEND_ENV_FILE }}" > .env
 
             # Iniciar los servicios con Docker Compose
-            sudo docker compose up -d --build
+            sudo docker-compose up -d --build
           EOF
 
       - name: Verify Deployment
