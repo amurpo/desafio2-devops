@@ -53,4 +53,12 @@ jobs:
 
       - name: Verify Deployment
         run: |
-          curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_IP }} | grep 200 || exit 1
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_IP }})
+          echo "HTTP Status Code: $HTTP_CODE"
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "Deployment is successful"
+          else
+            echo "Deployment failed with status code $HTTP_CODE"
+            exit 1
+          fi
+
