@@ -1,5 +1,4 @@
 name: Deploy to EC2
-
 on:
   push:
     branches:
@@ -8,41 +7,40 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up SSH
+      
+      - name: Configure SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.EC2_KEY }}
-
+      
       - name: Deploy to EC2
+        env:
+          EC2_IP: ${{ secrets.EC2_IP }}
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP << 'EOF'
             # Actualizar sistema e instalar Docker
             sudo yum update -y
             sudo amazon-linux-extras enable docker
             sudo yum install -y docker jq
             sudo systemctl start docker
             sudo systemctl enable docker
-
             # Instalar Docker Compose
             sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             sudo chmod +x /usr/local/bin/docker-compose
-
             # Clonar el repositorio
             git clone https://github.com/amurpo/desafio2-devops.git app
             cd app
-
             # Crear el archivo .env usando el secreto
             echo "${{ secrets.BACKEND_ENV_FILE }}" > .env
-
             # Iniciar los servicios con Docker Compose
             sudo docker-compose up -d --build
           EOF
+      
       - name: Verify Deployment
+        env:
+          EC2_IP: ${{ secrets.EC2_IP }}
         run: |
-            curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_IP }} | grep 200 || exit 1
-  
+          curl -s -o /dev/null -w "%{http_code}" http://$EC2_IP | grep 200 || exit 1
