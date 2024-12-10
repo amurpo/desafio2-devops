@@ -44,9 +44,9 @@ jobs:
             echo "${{ secrets.BACKEND_ENV_FILE }}" > .env
 
             # Iniciar los servicios con Docker Compose
-            sudo docker-compose up -d --build
+            sudo docker compose up -d --build
           EOF
 
       - name: Verify Deployment
         run: |
-          curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_IP }}:4000 | grep 200 || exit 1
+          curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_IP }} | grep 200 || exit 1
