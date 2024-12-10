@@ -24,31 +24,47 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh ubuntu@${{ secrets.EC2_IP }} << 'EOF'
-            # Actualizar sistema e instalar Docker
+            # Actualizar sistema e instalar dependencias
             sudo apt update && sudo apt upgrade -y
-            sudo apt install -y docker.io git
+            sudo apt install -y git curl nginx
 
-            # Configurar Docker para que inicie automáticamente
-            sudo systemctl start docker
-            sudo systemctl enable docker
+            # Instalar Node.js 20 y PM2
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt install -y nodejs
+            sudo npm install pm2@latest -g
 
-            # Instalar Docker Compose
-            sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            docker-compose --version
-            # Borrar directorio /app si existe
-            if [ -d /app ]; then
-             rm -rf /app
-            fi
-            # Clonar el repositorio
-            git clone https://github.com/amurpo/desafio2-devops.git app
-            cd app
+            # Clonar el repositorio desde GitHub
+            cd /home/ubuntu
+            git clone https://github.com/amurpo/desafio2-devops.git
+            cd desafio2-devops
 
-            # Crear el archivo .env usando el secreto
-            echo "${{ secrets.BACKEND_ENV_FILE }}" > .env
+            # Instalar las dependencias de Node.js
+            npm install
 
-            # Iniciar los servicios con Docker Compose
-            sudo docker-compose up -d --build
+            # Configurar Nginx como proxy inverso usando solo la IP del EC2
+            sudo bash -c 'cat > /etc/nginx/sites-available/default <<EOL
+            server {
+                listen 80;
+
+                server_name ${ { secrets.EC2_IP } }; # Usamos la IP del EC2 como dominio
+
+                location / {
+                    proxy_pass http://localhost:8080;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade \$http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host \$host;
+                    proxy_cache_bypass \$http_upgrade;
+                }
+            }
+            EOL'
+
+            # Reiniciar Nginx para aplicar los cambios
+            sudo systemctl restart nginx
+
+            # Iniciar la aplicación con PM2
+            pm2 start app.js --name nodejs-image-demo
+            pm2 save
           EOF
 
       - name: Verify Deployment
@@ -61,4 +77,3 @@ jobs:
             echo "Deployment failed with status code $HTTP_CODE"
             exit 1
           fi
-
