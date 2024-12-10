@@ -1,0 +1,20 @@
+services:
+  frontend:
+    build: ./flask-frontend/
+    container_name: frontend
+    image: amurpo/flask-frontend:latest
+    ports:
+     - "80:4000"
+    networks:
+      - osobusa-network
+  backend:
+    build: ./go-backend-mongodb
+    container_name: backend
+    image: amurpo/go-backend:latest
+    env_file:
+      - .env
+    networks:
+      - osobusa-network
+
+networks:
+  osobusa-network:
