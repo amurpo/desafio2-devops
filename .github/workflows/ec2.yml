@@ -27,7 +27,7 @@ jobs:
             # Actualizar sistema e instalar Docker
             sudo yum update -y
             sudo amazon-linux-extras enable docker
-            sudo yum install -y docker jq
+            sudo yum install -y git docker jq
             sudo systemctl start docker
             sudo systemctl enable docker
 
