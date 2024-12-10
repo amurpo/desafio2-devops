@@ -27,13 +27,14 @@ jobs:
             # Actualizar sistema e instalar Docker
             sudo yum update -y
             sudo amazon-linux-extras enable docker
-            sudo yum install -y git docker jq
+            sudo yum install -y git docker
             sudo systemctl start docker
             sudo systemctl enable docker
 
             # Instalar Docker Compose
-            sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
             sudo chmod +x /usr/local/bin/docker-compose
+            docker-compose --version
 
             # Clonar el repositorio
             git clone https://github.com/amurpo/desafio2-devops.git app
