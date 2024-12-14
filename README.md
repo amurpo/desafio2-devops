@@ -11,12 +11,12 @@ Antes de usar este flujo de trabajo, asegúrate de tener configurados los siguie
 1. **Claves de acceso de AWS**: Debes agregar tus claves de acceso de AWS a los secretos de GitHub.
    - `AWS_ACCESS_KEY_ID`: Tu clave de acceso AWS.
    - `AWS_SECRET_ACCESS_KEY`: Tu clave secreta de acceso AWS.
+   - `SUBNET_ID`: ID de la subred de AWS donde se lanzará la instancia.
 
 2. **Variables de entorno**: Las siguientes variables deben estar configuradas para que el flujo de trabajo funcione correctamente:
    - `IMAGE_ID`: ID de la imagen de Amazon EC2 que deseas usar.
    - `KEY_NAME`: Nombre de la clave SSH para acceder a la instancia EC2.
    - `SECURITY_GROUP_ID`: ID del grupo de seguridad de AWS que se asignará a la instancia.
-   - `SUBNET_ID`: ID de la subred de AWS donde se lanzará la instancia.
 
 ## Flujo de trabajo de GitHub Actions
 
