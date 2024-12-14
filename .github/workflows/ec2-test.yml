@@ -42,5 +42,5 @@ jobs:
         run: |
           aws ec2 create-image \
             --instance-id ${{ steps.launch-ec2.outputs.instance_id }} \
-            --name "github-actions-cursodevops-$(date +%Y%m%d-%H%M%S)" \
+            --name "github-actions-cursodevops-test-$(date +%Y%m%d-%H%M%S)" \
             --description "AMI creada usando GitHub Actions"
